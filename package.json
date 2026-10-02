@@ -1,0 +1,17 @@
+{
+  "name": "access-control-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Практическая работа 1.2 — проверка контроля доступа в локальном веб-приложении",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "start:vulnerable": "node tools/start.mjs vulnerable",
+    "start:fixed": "node tools/start.mjs fixed",
+    "test": "node --test tests/*.test.mjs",
+    "test:policy:vulnerable": "node tools/run-policy.mjs vulnerable",
+    "test:policy:fixed": "node tools/run-policy.mjs fixed"
+  },
+  "license": "MIT"
+}
