@@ -1,0 +1,17 @@
+{
+  "name": "Практическая работа 1.2 — Linux и Node.js",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "forwardPorts": [3000, 3001],
+  "portsAttributes": {
+    "3000": { "label": "Уязвимый учебный стенд", "onAutoForward": "openBrowser" },
+    "3001": { "label": "Исправленный учебный стенд", "onAutoForward": "notify" }
+  },
+  "postCreateCommand": "npm test",
+  "postStartCommand": "bash .devcontainer/start-lab.sh",
+  "customizations": {
+    "vscode": {
+      "settings": { "workbench.startupEditor": "readme" }
+    }
+  }
+}
+  
