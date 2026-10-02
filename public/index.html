@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лаборатория контроля доступа</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef3f9;color:#15233d;font:17px system-ui,sans-serif}main{max-width:980px;margin:auto;padding:30px 20px}h1{font-size:32px;margin-bottom:10px}h2{font-size:23px}section{background:white;border:1px solid #d7e0ed;border-radius:14px;padding:24px;margin:18px 0}label{display:inline-block;margin:8px 12px 8px 0}input,select,button{font:inherit;border-radius:7px;padding:10px;border:1px solid #9aaecb}button{background:#174dac;color:white;cursor:pointer;margin:6px 6px 6px 0}pre{background:#132139;color:#eaf1ff;padding:18px;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}small{color:#48607e}.tag{background:#dce8fc;padding:6px 12px;border-radius:20px}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid #ddd}#who{font-weight:600}a{color:#174dac}
+</style>
+<main><span class="tag">Практическая работа 1.2</span><h1>Проверка контроля доступа</h1>
+<p>Работающий локальный стенд. Учебные записи созданы для эксперимента. Проверьте, может ли студент прочитать чужую работу или открыть список преподавателя.</p>
+<p id="mode">Проверка режима…</p>
+<section><h2>1 Войдите в систему</h2>
+<table><tr><th>Роль</th><th>Логин</th><th>Пароль</th></tr><tr><td>Студент А</td><td>student-a</td><td>lab-a</td></tr><tr><td>Студент Б</td><td>student-b</td><td>lab-b</td></tr><tr><td>Преподаватель</td><td>teacher</td><td>lab-teacher</td></tr></table>
+<form id="login"><label>Логин <input id="name" value="student-a" required></label><label>Пароль <input id="password" type="password" value="lab-a" required></label><button>Войти</button></form>
+<button id="logout">Выйти</button><p id="who">Вход не выполнен</p></section>
+<section><h2>2 Выполните запрос</h2><p>Работа 101 принадлежит студенту А, работа 102 — студенту Б. Студент должен видеть только собственную работу. Преподаватель видит обе.</p>
+<label>Номер работы <input id="work" type="number" value="101"></label>
+<div><button id="read">Прочитать работу</button><button id="mine">Мои работы</button><button id="all">Список преподавателя</button></div>
+<label>Новая оценка <input id="grade" type="number" min="2" max="5" value="5"></label><button id="change">Изменить оценку</button>
+<p><small>Запросы отправляются серверу. Ответ ниже показывает настоящий HTTP статус и данные.</small></p>
+<pre id="output" aria-live="polite">Здесь появится ответ сервера.</pre></section>
+<section><h2>3 Зафиксируйте результат</h2><p>Для каждого теста запишите роль, адрес запроса, ожидаемый и фактический HTTP статус. Сделайте снимок экрана. Повторите те же тесты после запуска исправленного режима.</p><p>401 — требуется вход; 403 — вход выполнен, но прав недостаточно; 200 — запрос выполнен.</p></section></main>
+<script>
+const el=id=>document.getElementById(id);
+async function call(path,method='GET',data){
+ const r=await fetch(path,{method,headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined});
+ const json=await r.json(); el('output').textContent=method+' '+path+'\nHTTP '+r.status+'\n'+JSON.stringify(json,null,2); return {r,json};
+}
+async function who(){const r=await fetch('/api/me');const j=await r.json();el('who').textContent=r.ok?'Вход: '+j.id+' | роль: '+j.role:'Вход не выполнен';}
+el('login').onsubmit=async e=>{e.preventDefault();await call('/api/login','POST',{login:el('name').value,password:el('password').value});await who();};
+el('logout').onclick=async()=>{await call('/api/logout','POST');await who();};
+el('read').onclick=()=>call('/api/works/'+el('work').value);
+el('mine').onclick=()=>call('/api/works');
+el('all').onclick=()=>call('/api/teacher/works');
+el('change').onclick=()=>call('/api/works/'+el('work').value,'PATCH',{grade:Number(el('grade').value)});
+fetch('/api/health').then(r=>r.json()).then(j=>el('mode').textContent='Режим сервера: '+(j.mode==='fixed'?'исправленный':'уязвимый'));
+who();
+</script></html>
